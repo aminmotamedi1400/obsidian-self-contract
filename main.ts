@@ -1,4 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {ContractModal} from './ContractModal' ;
 
 // Remember to rename these classes and interfaces!
 
@@ -80,8 +81,9 @@ export default class ContractPlugin extends Plugin {
 			id: 'create-new-self-contract',
 			name: 'Create New Self-Contract',
 			callback: () => {
-				console.log('Contract command triggered!');
-				new Notice('This is our first command!');
+				// console.log('Contract command triggered!');
+				// new Notice('This is our first command!');
+				new ContractModal(this.app).open();
 			}
 		});
 	}
