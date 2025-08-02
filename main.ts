@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
+export default class ContractPlugin extends Plugin {
 	settings: MyPluginSettings;
 
 	async onload() {
@@ -76,6 +76,14 @@ export default class MyPlugin extends Plugin {
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		this.addCommand({
+			id: 'create-new-self-contract',
+			name: 'Create New Self-Contract',
+			callback: () => {
+				console.log('Contract command triggered!');
+				new Notice('This is our first command!');
+			}
+		});
 	}
 
 	onunload() {
@@ -108,9 +116,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: ContractPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: ContractPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
