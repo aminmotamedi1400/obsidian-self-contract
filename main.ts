@@ -83,7 +83,12 @@ export default class ContractPlugin extends Plugin {
 			callback: () => {
 				// console.log('Contract command triggered!');
 				// new Notice('This is our first command!');
-				new ContractModal(this.app).open();
+				const handleFormSubmit = (data:any) => {
+				console.log("سفارش از مودال رسید!");
+				console.log("اطلاعات دریافتی:", data);
+				new Notice("اطلاعات با موفقیت از مودال گرفته شد!",data);
+				};
+				new ContractModal(this.app,handleFormSubmit).open();
 			}
 		});
 	}
