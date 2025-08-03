@@ -259,7 +259,7 @@ tags: [contract, self]
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeFile) {
 					// به زودی این تابع را می‌سازیم
-					// this.processContractFailure(activeFile);
+					this.processContractFailure(activeFile);
 				} else {
 					new Notice("Error: No active file selected.");
 				}
