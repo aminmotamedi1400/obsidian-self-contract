@@ -147,6 +147,27 @@ tags: [contract, self]
 				new ContractModal(this.app,(result)=>{this.createContractFile(result.title, result.dueDate);}).open();
 			}
 		});
+		this.addCommand({
+			id: 'mark-contract-completed',
+			name: 'Mark Contract as Completed',
+			callback: () => {
+				// اینجا منطق اصلی ما قرار خواهد گرفت
+				// console.log("Mark as Completed command triggered!");
+				// new Notice("Checking active file...");
+				    const activeFile = this.app.workspace.getActiveFile();
+
+			if (activeFile) {
+				console.log("Active file found:", activeFile.path);
+				new Notice(`File to process: ${activeFile.name}`);
+				// در مراحل بعد، این فایل را پردازش خواهیم کرد
+				// this.processContractCompletion(activeFile);
+			} else {
+				console.log("No active file.");
+				new Notice("Error: No active file selected.");
+			}
+			}
+		});
+		
 	}
 
 	onunload() {
