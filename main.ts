@@ -91,6 +91,31 @@ tags: [contract, self]
 		new Notice("Validation successful! Proceeding to update the file.");
 
 		// در گام بعدی، اینجا کد ویرایش فایل را اضافه می‌کنیم
+		    if (!frontmatter || frontmatter.status !== 'active') {
+        new Notice("This contract is not currently active.");
+        return;
+		}
+
+		// --- شروع کد جدید ---
+		try {
+			await this.app.vault.process(file, (data) => {
+				// "data" محتوای فعلی فایل به صورت یک رشته است
+				const completionDate = new Date().toISOString().slice(0, 10);
+
+				// با استفاده از یک عبارت باقاعده (Regex)، خط status را پیدا و جایگزین می‌کنیم
+				let newData = data.replace(
+					/status:\s*active/,
+					`status: completed\ncompletionDate: ${completionDate}`
+				);
+
+				return newData; // محتوای جدید را برمی‌گردانیم
+			});
+
+			new Notice("🎉 Contract marked as completed!");
+
+		} catch (e) {
+			console.error("Error updating file:", e);        new Notice("Failed to update the contract file.");
+		}
 	}
 	async onload() {
 		await this.loadSettings();
