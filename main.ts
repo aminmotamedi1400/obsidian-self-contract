@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import {ContractModal} from './ContractModal' ;
 
 // Remember to rename these classes and interfaces!
@@ -69,6 +69,10 @@ tags: [contract, self]
     } catch (e) {        new Notice('Error: File with this name might already exist.');
         console.error("Error creating contract file:", e);
     }
+	}
+	async processContractCompletion(file: TFile) {
+    // این تابع، منطق اصلی را در خود جای خواهد داد
+    new Notice(`Processing ${file.name}`);
 	}
 	async onload() {
 		await this.loadSettings();
@@ -160,7 +164,7 @@ tags: [contract, self]
 				console.log("Active file found:", activeFile.path);
 				new Notice(`File to process: ${activeFile.name}`);
 				// در مراحل بعد، این فایل را پردازش خواهیم کرد
-				// this.processContractCompletion(activeFile);
+				this.processContractCompletion(activeFile);
 			} else {
 				console.log("No active file.");
 				new Notice("Error: No active file selected.");
