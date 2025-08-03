@@ -70,90 +70,42 @@ tags: [contract, self]
 			console.error("Error creating contract file:", e);
 		}
 	}
-	async processContractCompletion(file: TFile) {
-		// 1. اعتبارسنجی مسیر فایل
+	private async updateContractStatus(file: TFile, newStatus: 'completed' | 'failed') {    // اعتبارسنجی‌ها (کپی شده از یکی از توابع قبلی)
 		if (!file.path.startsWith('Contracts/')) {
 			new Notice("This command only works on files in the 'Contracts' folder.");
-			return; // از تابع خارج شو
+			return;
 		}
-
-		// 2. خواندن فراداده فایل
 		const metadata = this.app.metadataCache.getFileCache(file);
 		const frontmatter = metadata?.frontmatter;
-
-		// 3. اعتبارسنجی وضعیت (status)
 		if (!frontmatter || frontmatter.status !== 'active') {
 			new Notice("This contract is not currently active.");
 			return;
 		}
 
-		// اگر به اینجا رسیدیم، یعنی فایل معتبر است!
-		new Notice("Validation successful! Proceeding to update the file.");
-
-		// در گام بعدی، اینجا کد ویرایش فایل را اضافه می‌کنیم
-		    if (!frontmatter || frontmatter.status !== 'active') {
-        new Notice("This contract is not currently active.");
-        return;
-		}
-
-		// --- شروع کد جدید ---
 		try {
 			await this.app.vault.process(file, (data) => {
-				// "data" محتوای فعلی فایل به صورت یک رشته است
 				const completionDate = new Date().toISOString().slice(0, 10);
+				
+				// --- منطق عمومی‌شده ---
+				const newFrontmatter = `status: ${newStatus}\ncompletionDate: ${completionDate}`;            let updatedData = data.replace(/status:\s*active/, newFrontmatter);
 
-				// با استفاده از یک عبارت باقاعده (Regex)، خط status را پیدا و جایگزین می‌کنیم
-				let newData = data.replace(
-					/status:\s*active/,
-					`status: completed\ncompletionDate: ${completionDate}`
-				);
+				if (newStatus === 'failed') {
+					updatedData += `\n\n## 💡 Lessons Learned\n\n- `;
+				}
 
-				return newData; // محتوای جدید را برمی‌گردانیم
+				return updatedData;
 			});
 
-			new Notice("🎉 Contract marked as completed!");
+			const successMessage = newStatus === 'completed' 
+				? "🎉 Contract marked as completed!" 
+				: "Contract marked as failed. Log what you learned!";
+			
+			new Notice(successMessage);
 
 		} catch (e) {
-			console.error("Error updating file:", e);        new Notice("Failed to update the contract file.");
+			console.error("Error updating file:", e);
+			new Notice("Failed to update the contract file.");
 		}
-	}
-
-	async processContractFailure(file: TFile) {
-		// اعتبارسنجی‌ها دقیقاً مثل قبل هستند
-		if (!file.path.startsWith('Contracts/')) {
-			new Notice("This command only works on files in the 'Contracts' folder.");
-			return;
-		}
-
-		const metadata = this.app.metadataCache.getFileCache(file);
-		const frontmatter = metadata?.frontmatter;
-
-		if (!frontmatter || frontmatter.status !== 'active') {        new Notice("This contract is not currently active.");
-			return;
-		}
-
-		// --- این بخش تغییر می‌کند ---
-		try {
-			await this.app.vault.process(file, (data) => {
-				const completionDate = new Date().toISOString().slice(0, 10);
-				
-				// محتوای جدید را تعریف می‌کنیم
-				const newFrontmatter = `status: failed\ncompletionDate: ${completionDate}`;
-				const lessonsLearnedSection = `\n\n## 💡 Lessons Learned\n\n- `;
-
-				// خط status را با اطلاعات جدید جایگزین می‌کنیم
-				let newData = data.replace(/status:\s*active/, newFrontmatter);
-				
-				// بخش "درس‌های آموخته" را به انتهای فایل اضافه می‌کنیم
-				newData += lessonsLearnedSection;
-
-				return newData;
-			});
-
-			new Notice("Contract marked as failed. Log what you learned!");
-
-		} catch (e) {        console.error("Error updating file:", e);
-			new Notice("Failed to update the contract file.");    }
 	}
 	async onload() {
 		await this.loadSettings();
@@ -234,37 +186,28 @@ tags: [contract, self]
 		});
 		this.addCommand({
 			id: 'mark-contract-completed',
-			name: 'Mark Contract as Completed',
-			callback: () => {
-				// اینجا منطق اصلی ما قرار خواهد گرفت
-				// console.log("Mark as Completed command triggered!");
-				// new Notice("Checking active file...");
-				    const activeFile = this.app.workspace.getActiveFile();
-
-			if (activeFile) {
-				console.log("Active file found:", activeFile.path);
-				new Notice(`File to process: ${activeFile.name}`);
-				// در مراحل بعد، این فایل را پردازش خواهیم کرد
-				this.processContractCompletion(activeFile);
-			} else {
-				console.log("No active file.");
-				new Notice("Error: No active file selected.");
-			}
+			name: 'Mark Contract as Completed',    callback: () => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (activeFile) {
+					this.updateContractStatus(activeFile, 'completed');
+				} else {
+					new Notice("Error: No active file selected.");
+				}
 			}
 		});
+
+		// دستور شکست خوردن
 		this.addCommand({
 			id: 'mark-contract-failed',
 			name: 'Mark Contract as Failed',
 			callback: () => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeFile) {
-					// به زودی این تابع را می‌سازیم
-					this.processContractFailure(activeFile);
+					this.updateContractStatus(activeFile, 'failed');
 				} else {
 					new Notice("Error: No active file selected.");
 				}
-			}
-		});
+			}});
 		
 	}
 
