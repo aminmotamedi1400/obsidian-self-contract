@@ -13,7 +13,11 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class ContractPlugin extends Plugin {
 	settings: MyPluginSettings;
-
+	async createContractFile(title: string , dueDate: string){
+		console.log(`we in creatContractFile
+			Title : ${title} 
+			Due Date: ${dueDate}`);
+	}
 	async onload() {
 		await this.loadSettings();
 
