@@ -214,6 +214,19 @@ tags: [contract, self]
 			}
 			}
 		});
+		this.addCommand({
+			id: 'mark-contract-failed',
+			name: 'Mark Contract as Failed',
+			callback: () => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (activeFile) {
+					// به زودی این تابع را می‌سازیم
+					// this.processContractFailure(activeFile);
+				} else {
+					new Notice("Error: No active file selected.");
+				}
+			}
+		});
 		
 	}
 
