@@ -14,9 +14,61 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 export default class ContractPlugin extends Plugin {
 	settings: MyPluginSettings;
 	async createContractFile(title: string , dueDate: string){
-		console.log(`we in creatContractFile
-			Title : ${title} 
-			Due Date: ${dueDate}`);
+		// console.log(`we in creatContractFile
+		// 	Title : ${title} 
+		// 	Due Date: ${dueDate}`);
+		// فایل: main.ts (داخل متد createContractFile)
+    const contractsFolder = 'Contracts';
+
+    // 1. چک کردن و ساختن پوشه
+    try {
+        // این دستور سعی می‌کنه پوشه رو بسازه.
+        await this.app.vault.createFolder(contractsFolder);
+        new Notice("'Contracts' folder created!");
+    } catch (e) {
+        // اگر پوشه از قبل وجود داشته باشه، خطا می‌ده که ما نادیده‌اش می‌گیریم.
+        // console.log("Contracts folder already exists.");
+    }
+
+    // 2. آماده کردن محتوای فایل (Template)
+    const fileContent = `---
+creationDate: ${new Date().toISOString().slice(0, 10)}
+dueDate: ${dueDate || 'Not set'}
+status: active
+tags: [contract, self]
+---
+
+# Contract: ${title}
+
+## 🎯 My Commitment
+*I, [Your Name], commit to achieving the following goal:*
+
+- 
+
+## 🏆 The Reward for Success
+*Upon successful completion, I will reward myself with:*
+
+- 
+
+## ⚠️ The Consequence of Failure
+*If I fail to meet this commitment, I will accept the following consequence:*
+
+- 
+`;
+
+    // 3. ایجاد فایل نهایی
+    const fileName = `${title.replace(/[^a-zA-Z0-9 -]/g, '')}.md`;
+    const filePath = `${contractsFolder}/${fileName}`;
+
+    try {
+        const newFile = await this.app.vault.create(filePath, fileContent);
+        new Notice(`Contract "${title}" created successfully!`);        
+        // 4. (اختیاری ولی خیلی خوب) باز کردن فایل جدید برای کاربر
+        this.app.workspace.openLinkText(newFile.path, '', false);
+
+    } catch (e) {        new Notice('Error: File with this name might already exist.');
+        console.error("Error creating contract file:", e);
+    }
 	}
 	async onload() {
 		await this.loadSettings();
