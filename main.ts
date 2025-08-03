@@ -117,6 +117,44 @@ tags: [contract, self]
 			console.error("Error updating file:", e);        new Notice("Failed to update the contract file.");
 		}
 	}
+
+	async processContractFailure(file: TFile) {
+		// اعتبارسنجی‌ها دقیقاً مثل قبل هستند
+		if (!file.path.startsWith('Contracts/')) {
+			new Notice("This command only works on files in the 'Contracts' folder.");
+			return;
+		}
+
+		const metadata = this.app.metadataCache.getFileCache(file);
+		const frontmatter = metadata?.frontmatter;
+
+		if (!frontmatter || frontmatter.status !== 'active') {        new Notice("This contract is not currently active.");
+			return;
+		}
+
+		// --- این بخش تغییر می‌کند ---
+		try {
+			await this.app.vault.process(file, (data) => {
+				const completionDate = new Date().toISOString().slice(0, 10);
+				
+				// محتوای جدید را تعریف می‌کنیم
+				const newFrontmatter = `status: failed\ncompletionDate: ${completionDate}`;
+				const lessonsLearnedSection = `\n\n## 💡 Lessons Learned\n\n- `;
+
+				// خط status را با اطلاعات جدید جایگزین می‌کنیم
+				let newData = data.replace(/status:\s*active/, newFrontmatter);
+				
+				// بخش "درس‌های آموخته" را به انتهای فایل اضافه می‌کنیم
+				newData += lessonsLearnedSection;
+
+				return newData;
+			});
+
+			new Notice("Contract marked as failed. Log what you learned!");
+
+		} catch (e) {        console.error("Error updating file:", e);
+			new Notice("Failed to update the contract file.");    }
+	}
 	async onload() {
 		await this.loadSettings();
 
